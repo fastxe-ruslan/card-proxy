@@ -5,7 +5,6 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import * as Joi from 'joi';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
-import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { WasabiModule } from './modules/wasabi/wasabi.module';
 import { CardsModule } from './modules/cards/cards.module';
@@ -102,7 +101,6 @@ import { ScheduleModule } from '@nestjs/schedule';
         synchronize: false,
       }),
     }),
-    HealthModule,
     AuthModule,
     WasabiModule,
     CardsModule,
