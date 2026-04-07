@@ -195,9 +195,10 @@ export interface AuthTransactionListResponse {
 
 // ─── Files ────────────────────────────────────────────────────────────────────
 
+/** Body for multipart upload per Wasabi POST .../common/file/upload */
 export interface UploadDocumentRequest {
-  holderId: string;
-  documentType: string;
+  /** Documented value: `card` */
+  category?: string;
   file: Buffer;
   fileName: string;
   mimeType: string;
@@ -205,22 +206,18 @@ export interface UploadDocumentRequest {
 
 export interface UploadDocumentResponse {
   fileId: string;
-  holderId: string;
-  documentType: string;
-  status: string;
 }
 
 // ─── Account ─────────────────────────────────────────────────────────────────
 
-export interface GetProviderBalanceRequest {
-  programId: string;
-}
-
-export interface ProviderBalanceInfo {
-  programId: string;
+/** Single row from POST .../account/info (`data` is an array in the official doc). */
+export interface WasabiAccountAsset {
+  accountId: string;
+  accountName: string;
+  accountType: string;
   currency: string;
-  availableBalance: string;
-  totalBalance: string;
-  frozenBalance: string;
-  updatedAt: string;
+  totalBalance: number | string;
+  availableBalance: number | string;
+  frozenBalance: number | string;
+  digital: number;
 }

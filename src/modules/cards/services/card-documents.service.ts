@@ -123,8 +123,6 @@ export class CardDocumentsService {
       try {
         const res = await this.wasabiApi.uploadDocument(
           {
-            holderId: holder.wasabiHolderId ?? dto.holderId,
-            documentType: docType,
             file: buffer,
             fileName: `${docType.toLowerCase()}.${mimeType.split('/')[1]}`,
             mimeType,

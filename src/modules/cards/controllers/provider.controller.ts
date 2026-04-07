@@ -27,10 +27,7 @@ export class ProviderController {
   async getProviderBalance(@CurrentUser('sub') userId: string) {
     const programId = this.configService.get<string>('WASABI_PROGRAM_ID');
 
-    const result = await this.wasabiApi.getProviderBalance(
-      { programId: programId ?? '' },
-      { programId },
-    );
+    const result = await this.wasabiApi.getProviderBalance({ programId });
 
     this.auditService.log({
       actorId: userId,

@@ -19,16 +19,22 @@ export const ApiGetProviderBalance = () =>
     }),
     ApiResponse({
       status: 200,
-      description: 'Provider balance by currency',
+      description:
+        'Wasabi account assets (same shape as POST /merchant/core/mcb/account/info `data`)',
       schema: {
         example: {
-          data: {
-            programId: 'PROG-001',
-            currency: 'USD',
-            availableBalance: '10000.00',
-            totalBalance: '10500.00',
-            frozenBalance: '500.00',
-          },
+          data: [
+            {
+              accountId: '19847563867367666',
+              accountName: 'wallet9023',
+              accountType: 'WALLET',
+              currency: 'USD',
+              totalBalance: 100,
+              availableBalance: 100,
+              frozenBalance: 0,
+              digital: 2,
+            },
+          ],
         },
       },
     }),

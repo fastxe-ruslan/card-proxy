@@ -14,11 +14,10 @@ import {
   GetAuthTransactionsRequest,
   GetCardInfoRequest,
   GetCardSensitiveRequest,
-  GetProviderBalanceRequest,
   HolderInfo,
   HolderListResponse,
   OpenCardRequest,
-  ProviderBalanceInfo,
+  WasabiAccountAsset,
   QueryHolderRequest,
   SetPinRequest,
   UnfreezeCardRequest,
@@ -250,8 +249,7 @@ export class WasabiApiService {
     opts?: WasabiRequestOptions,
   ): Promise<UploadDocumentResponse> {
     const form = new FormData();
-    form.append('holderId', dto.holderId);
-    form.append('documentType', dto.documentType);
+    form.append('category', dto.category ?? 'card');
     form.append(
       'file',
       new Blob([dto.file.buffer as ArrayBuffer], { type: dto.mimeType }),
@@ -266,13 +264,12 @@ export class WasabiApiService {
   }
 
   getProviderBalance(
-    dto: GetProviderBalanceRequest,
     opts?: WasabiRequestOptions,
-  ): Promise<ProviderBalanceInfo> {
+  ): Promise<WasabiAccountAsset[]> {
     return this.http.post(
       'getProviderBalance',
       '/merchant/core/mcb/account/info',
-      dto,
+      {},
       opts,
     );
   }
