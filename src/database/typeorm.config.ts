@@ -13,7 +13,6 @@ import { CardholderEntity } from '../modules/cards/entities/cardholder.entity';
 import { CardEntity } from '../modules/cards/entities/card.entity';
 import { CardTransactionEntity } from '../modules/cards/entities/card-transaction.entity';
 import { TransactionEntity } from '../modules/transactions/entities/transaction.entity';
-import { WasabiCredentialEntity } from '../modules/wasabi-client/entities/wasabi-credential.entity';
 import { WasabiRequestLogEntity } from '../modules/wasabi-client/entities/wasabi-request-log.entity';
 import { WasabiWebhookEntity } from '../modules/webhooks/entities/wasabi-webhook.entity';
 import { IdempotencyKeyEntity } from '../modules/webhooks/entities/idempotency-key.entity';
@@ -40,7 +39,6 @@ const dataSource = new DataSource({
     CardEntity,
     CardTransactionEntity,
     TransactionEntity,
-    WasabiCredentialEntity,
     WasabiRequestLogEntity,
     WasabiWebhookEntity,
     IdempotencyKeyEntity,

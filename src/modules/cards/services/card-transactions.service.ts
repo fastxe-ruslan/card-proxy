@@ -100,15 +100,12 @@ export class CardTransactionsService {
     const currency = dto.currency ?? 'USD';
     const merchantOrderNo = randomUUID();
 
-    const result = await this.wasabiApi.depositToCard(
-      {
-        cardId: card.wasabiCardNo ?? cardId,
-        amount: amount.toFixed(2),
-        currency,
-        remark: merchantOrderNo,
-      },
-      { programId: card.programId },
-    );
+    const result = await this.wasabiApi.depositToCard({
+      cardId: card.wasabiCardNo ?? cardId,
+      amount: amount.toFixed(2),
+      currency,
+      remark: merchantOrderNo,
+    });
 
     const tx = await this.txRepo.save(
       this.txRepo.create({
@@ -157,16 +154,13 @@ export class CardTransactionsService {
         .toISOString()
         .slice(0, 10);
 
-    const wasabiResult = await this.wasabiApi.getAuthTransactions(
-      {
-        cardId: card.wasabiCardNo ?? cardId,
-        startDate,
-        endDate,
-        pageNum: page,
-        pageSize,
-      },
-      { programId: card.programId },
-    );
+    const wasabiResult = await this.wasabiApi.getAuthTransactions({
+      cardId: card.wasabiCardNo ?? cardId,
+      startDate,
+      endDate,
+      pageNum: page,
+      pageSize,
+    });
 
     for (const tx of wasabiResult.records) {
       await this.txRepo.upsert(

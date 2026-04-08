@@ -41,7 +41,6 @@ function sleep(ms: number): Promise<void> {
 }
 
 export interface WasabiRequestOptions {
-  programId?: string;
   correlationId?: string;
   timeoutMs?: number;
 }
@@ -95,23 +94,22 @@ export class WasabiHttpService {
   ): Promise<TRes> {
     const correlationId =
       options.correlationId ?? this.correlationService.get();
-    const cred = await this.credentialService.resolve(options.programId);
+    const cred = await this.credentialService.resolve();
     const bodyJson = JSON.stringify(body);
     const timeout = options.timeoutMs ?? this.defaultTimeout;
     let lastError: unknown;
     let attempt = 0;
 
     while (attempt <= this.maxRetries) {
-      const signHeaders = this.signingService.buildHeaders(
-        cred.appId,
+      const signature = this.signingService.signRequestBody(
         bodyJson,
         cred.privateKeyPem,
       );
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'x-api-key': cred.apiKey,
+        'X-WSB-API-KEY': cred.apiKey,
+        'X-WSB-SIGNATURE': signature,
         'x-correlation-id': correlationId,
-        ...signHeaders,
       };
 
       const startMs = Date.now();
@@ -238,16 +236,15 @@ export class WasabiHttpService {
   ): Promise<TRes> {
     const correlationId =
       options.correlationId ?? this.correlationService.get();
-    const cred = await this.credentialService.resolve(options.programId);
-    const signHeaders = this.signingService.buildHeaders(
-      cred.appId,
-      '',
+    const cred = await this.credentialService.resolve();
+    const signature = this.signingService.signRequestBody(
+      '{}',
       cred.privateKeyPem,
     );
     const headers: Record<string, string> = {
-      'x-api-key': cred.apiKey,
+      'X-WSB-API-KEY': cred.apiKey,
+      'X-WSB-SIGNATURE': signature,
       'x-correlation-id': correlationId,
-      ...signHeaders,
     };
 
     const startMs = Date.now();

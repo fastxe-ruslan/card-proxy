@@ -83,13 +83,3 @@ export class CardRejectedException extends WasabiException {
     );
   }
 }
-
-export class CredentialNotFoundException extends WasabiException {
-  constructor(programId: string) {
-    super(
-      WasabiErrorCode.CredentialNotFound,
-      `No active credential found for program: ${programId}`,
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  }
-}

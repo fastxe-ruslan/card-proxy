@@ -1,15 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { WasabiCredentialEntity } from '../entities/wasabi-credential.entity';
-import { CredentialNotFoundException } from '../errors/wasabi.errors';
 
 export interface ResolvedCredential {
-  programId: string;
   apiKey: string;
-  appId: string;
-  kid: string | null;
+  /** Merchant RSA private key PEM — request signing (and 3DS decrypt if same key). */
   privateKeyPem: string;
 }
 
@@ -18,6 +12,7 @@ interface CacheEntry {
   expiresAt: number;
 }
 
+const CACHE_KEY = 'wasabi';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 @Injectable()
@@ -25,54 +20,27 @@ export class WasabiCredentialService {
   private readonly logger = new Logger(WasabiCredentialService.name);
   private readonly cache = new Map<string, CacheEntry>();
 
-  constructor(
-    @InjectRepository(WasabiCredentialEntity)
-    private readonly credentialRepo: Repository<WasabiCredentialEntity>,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly config: ConfigService) {}
 
-  async resolve(programId?: string): Promise<ResolvedCredential> {
-    const pid =
-      programId ??
-      this.configService.get<string>('WASABI_PROGRAM_ID') ??
-      (() => {
-        throw new CredentialNotFoundException('(WASABI_PROGRAM_ID not set)');
-      })();
-
-    const cached = this.cache.get(pid);
+  async resolve(): Promise<ResolvedCredential> {
+    const cached = this.cache.get(CACHE_KEY);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.credential;
     }
 
-    const entity = await this.credentialRepo.findOne({
-      where: { programId: pid, isActive: true },
+    const apiKey = this.config.getOrThrow<string>('WASABI_API_KEY');
+    const privateKeyPem = this.config.getOrThrow<string>('WASABI_PRIVATE_KEY');
+
+    const credential: ResolvedCredential = { apiKey, privateKeyPem };
+    this.cache.set(CACHE_KEY, {
+      credential,
+      expiresAt: Date.now() + CACHE_TTL_MS,
     });
-
-    if (!entity) {
-      this.logger.error(`No active Wasabi credential for program: ${pid}`);
-      throw new CredentialNotFoundException(pid);
-    }
-
-    const privateKeyPem = await this.resolvePrivateKey(entity.keyRef);
-
-    const credential: ResolvedCredential = {
-      programId: entity.programId,
-      apiKey: entity.apiKey,
-      appId: entity.appId,
-      kid: entity.kid,
-      privateKeyPem,
-    };
-
-    this.cache.set(pid, { credential, expiresAt: Date.now() + CACHE_TTL_MS });
     return credential;
   }
 
-  invalidate(programId: string): void {
-    this.cache.delete(programId);
-    this.logger.log(`Credential cache invalidated for program: ${programId}`);
-  }
-
-  private resolvePrivateKey(keyRef: string): Promise<string> {
-    return Promise.resolve(keyRef);
+  invalidate(): void {
+    this.cache.delete(CACHE_KEY);
+    this.logger.log('Wasabi credential cache invalidated');
   }
 }

@@ -114,15 +114,12 @@ export class CardsService {
 
     let wasabiResult: CardInfo;
     try {
-      wasabiResult = await this.wasabiApi.openCard(
-        {
-          programId: dto.programId,
-          holderId: holder.wasabiHolderId ?? '',
-          cardType: dto.cardType,
-          currency: 'USD',
-        },
-        { programId: dto.programId },
-      );
+      wasabiResult = await this.wasabiApi.openCard({
+        programId: dto.programId,
+        holderId: holder.wasabiHolderId ?? '',
+        cardType: dto.cardType,
+        currency: 'USD',
+      });
     } catch (err) {
       if (
         err instanceof WasabiException &&
@@ -177,18 +174,18 @@ export class CardsService {
       );
     }
 
-    const result = await this.wasabiApi.activatePhysicalCard(
-      { cardId: card.wasabiCardNo ?? cardId, last4: dto.activationCode },
-      { programId: card.programId },
-    );
+    const result = await this.wasabiApi.activatePhysicalCard({
+      cardId: card.wasabiCardNo ?? cardId,
+      last4: dto.activationCode,
+    });
 
     card.status = CardStatusMapper.fromWasabi(result.status);
     await this.cardRepo.save(card);
   
-    await this.wasabiApi.setPin(
-      { cardId: card.wasabiCardNo ?? cardId, pin: dto.pin },
-      { programId: card.programId },
-    );
+    await this.wasabiApi.setPin({
+      cardId: card.wasabiCardNo ?? cardId,
+      pin: dto.pin,
+    });
 
     this.auditService.log({
       actorId: userId,
@@ -213,10 +210,9 @@ export class CardsService {
       return ok(base);
     }
 
-    const sensitive = await this.wasabiApi.getCardSensitiveDetails(
-      { cardId: card.wasabiCardNo ?? cardId },
-      { programId: card.programId },
-    );
+    const sensitive = await this.wasabiApi.getCardSensitiveDetails({
+      cardId: card.wasabiCardNo ?? cardId,
+    });
 
     this.auditService.log({
       actorId: userId,
@@ -249,10 +245,9 @@ export class CardsService {
       );
     }
 
-    const info = await this.wasabiApi.getCardInfo(
-      { cardId: card.wasabiCardNo ?? cardId },
-      { programId: card.programId },
-    );
+    const info = await this.wasabiApi.getCardInfo({
+      cardId: card.wasabiCardNo ?? cardId,
+    });
 
     this.auditService.log({
       actorId: userId,
@@ -297,10 +292,10 @@ export class CardsService {
       );
     }
 
-    await this.wasabiApi.setPin(
-      { cardId: card.wasabiCardNo ?? cardId, pin: dto.pin },
-      { programId: card.programId },
-    );
+    await this.wasabiApi.setPin({
+      cardId: card.wasabiCardNo ?? cardId,
+      pin: dto.pin,
+    });
 
     this.auditService.log({
       actorId: userId,
@@ -336,14 +331,12 @@ export class CardsService {
 
     const result =
       action === 'freeze' || action === 'lock'
-        ? await this.wasabiApi.freezeCard(
-            { cardId: card.wasabiCardNo ?? cardId },
-            { programId: card.programId },
-          )
-        : await this.wasabiApi.unfreezeCard(
-            { cardId: card.wasabiCardNo ?? cardId },
-            { programId: card.programId },
-          );
+        ? await this.wasabiApi.freezeCard({
+            cardId: card.wasabiCardNo ?? cardId,
+          })
+        : await this.wasabiApi.unfreezeCard({
+            cardId: card.wasabiCardNo ?? cardId,
+          });
 
     card.status = CardStatusMapper.fromWasabi(result.status);
 

@@ -1,63 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { createSign, createVerify, randomUUID } from 'crypto';
+import { createSign } from 'crypto';
 
-export interface RequestSignatureHeaders {
-  'app-id': string;
-  timestamp: string;
-  nonce: string;
-  sign: string;
-}
-
+/**
+ * Matches Wasabi GitBook quickstart: SHA256withRSA over the raw request body (UTF-8),
+ * Base64 → header `X-WSB-SIGNATURE`. Multipart upload: sign `{}` per common/file/upload hint.
+ * @see https://wsb.gitbook.io/wasabicard-doc/guides/quickstart.md
+ */
 @Injectable()
 export class WasabiSigningService {
   private readonly logger = new Logger(WasabiSigningService.name);
 
-  buildHeaders(
-    appId: string,
-    body: string,
-    privateKeyPem: string,
-  ): RequestSignatureHeaders {
-    const timestamp = Date.now().toString();
-    const nonce = randomUUID();
-    const sign = this.sign(timestamp, nonce, body, privateKeyPem);
-    return { 'app-id': appId, timestamp, nonce, sign };
-  }
-
-  verifyWebhook(
-    body: string,
-    timestamp: string,
-    nonce: string,
-    signature: string,
-    publicKeyPem: string,
-  ): boolean {
+  signRequestBody(body: string, privateKeyPem: string): string {
     try {
-      const verifier = createVerify('RSA-SHA256');
-      verifier.update(this.buildStringToSign(timestamp, nonce, body));
-      verifier.end();
-      return verifier.verify(publicKeyPem, signature, 'base64');
+      const signer = createSign('RSA-SHA256');
+      signer.update(body, 'utf8');
+      signer.end();
+      return signer.sign(privateKeyPem, 'base64');
     } catch (err) {
-      this.logger.warn('Webhook signature verification failed', err);
-      return false;
+      this.logger.error('Wasabi request signing failed', err);
+      throw err;
     }
-  }
-
-  private sign(
-    timestamp: string,
-    nonce: string,
-    body: string,
-    privateKeyPem: string,
-  ): string {
-    const signer = createSign('RSA-SHA256');
-    signer.update(this.buildStringToSign(timestamp, nonce, body));
-    signer.end();
-    return signer.sign(privateKeyPem, 'base64');
-  }
-
-  private buildStringToSign(
-    timestamp: string,
-    nonce: string,
-    body: string,
-  ): string {
-    return `${timestamp}\n${nonce}\n${body}`;
   }
 }

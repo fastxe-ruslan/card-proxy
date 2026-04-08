@@ -152,17 +152,13 @@ export class CardHoldersService {
     };
 
     const wasabiResult = existing?.wasabiHolderId
-      ? await this.wasabiApi.updateBusinessHolder(
-          { holderId: existing.wasabiHolderId, ...wasabiReq },
-          { programId: dto.programId },
-        )
+      ? await this.wasabiApi.updateBusinessHolder({
+          holderId: existing.wasabiHolderId,
+          ...wasabiReq,
+        })
       : version === HolderVersion.V2
-        ? await this.wasabiApi.createBusinessHolderV2(wasabiReq, {
-            programId: dto.programId,
-          })
-        : await this.wasabiApi.createBusinessHolder(wasabiReq, {
-            programId: dto.programId,
-          });
+        ? await this.wasabiApi.createBusinessHolderV2(wasabiReq)
+        : await this.wasabiApi.createBusinessHolder(wasabiReq);
 
     const status = HolderStatusMapper.fromWasabi(wasabiResult.status);
 
@@ -208,10 +204,9 @@ export class CardHoldersService {
     if (holder.userId !== userId) throw new ForbiddenException('Access denied');
 
     if (refresh && holder.wasabiHolderId) {
-      const result = await this.wasabiApi.queryHolder(
-        { holderId: holder.wasabiHolderId },
-        { programId: holder.programId },
-      );
+      const result = await this.wasabiApi.queryHolder({
+        holderId: holder.wasabiHolderId,
+      });
       const first = result.records?.[0];
       if (first) {
         holder.status = HolderStatusMapper.fromWasabi(first.status);
@@ -247,14 +242,14 @@ export class CardHoldersService {
 
     if (existing?.wasabiHolderId) {
       return version === HolderVersion.V2
-        ? this.wasabiApi.updatePersonalHolderV2(
-            { holderId: existing.wasabiHolderId, ...base },
-            { programId: dto.programId },
-          )
-        : this.wasabiApi.updatePersonalHolder(
-            { holderId: existing.wasabiHolderId, ...base },
-            { programId: dto.programId },
-          );
+        ? this.wasabiApi.updatePersonalHolderV2({
+            holderId: existing.wasabiHolderId,
+            ...base,
+          })
+        : this.wasabiApi.updatePersonalHolder({
+            holderId: existing.wasabiHolderId,
+            ...base,
+          });
     }
 
     const v2Req: CreatePersonalHolderV2Request = {
@@ -264,9 +259,7 @@ export class CardHoldersService {
     };
 
     return version === HolderVersion.V2
-      ? this.wasabiApi.createPersonalHolderV2(v2Req, {
-          programId: dto.programId,
-        })
-      : this.wasabiApi.createPersonalHolder(base, { programId: dto.programId });
+      ? this.wasabiApi.createPersonalHolderV2(v2Req)
+      : this.wasabiApi.createPersonalHolder(base);
   }
 }

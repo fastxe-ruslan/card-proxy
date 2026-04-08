@@ -11,8 +11,6 @@ export enum WasabiErrorCode {
   CardAlreadyFrozen = 'CARD_ALREADY_FROZEN',
   CardNotFrozen = 'CARD_NOT_FROZEN',
   InsufficientFunds = 'INSUFFICIENT_FUNDS',
-  // Credential
-  CredentialNotFound = 'CREDENTIAL_NOT_FOUND',
   // HTTP / Network
   RateLimited = 'WASABI_RATE_LIMITED',
   Unavailable = 'WASABI_UNAVAILABLE',

@@ -5,7 +5,6 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { AuditService } from '../../audit/audit.service';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { WasabiApiService } from '../../wasabi-client/services/wasabi-api.service';
-import { ConfigService } from '@nestjs/config';
 import {
   ApiProviderTag,
   ApiGetProviderBalance,
@@ -18,16 +17,13 @@ export class ProviderController {
   constructor(
     private readonly wasabiApi: WasabiApiService,
     private readonly auditService: AuditService,
-    private readonly configService: ConfigService,
   ) {}
 
   @ApiGetProviderBalance()
   @Get('balance')
   @Roles('admin', 'internal')
   async getProviderBalance(@CurrentUser('sub') userId: string) {
-    const programId = this.configService.get<string>('WASABI_PROGRAM_ID');
-
-    const result = await this.wasabiApi.getProviderBalance({ programId });
+    const result = await this.wasabiApi.getProviderBalance();
 
     this.auditService.log({
       actorId: userId,

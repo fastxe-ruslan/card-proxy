@@ -263,9 +263,7 @@ export class WasabiApiService {
     );
   }
 
-  getProviderBalance(
-    opts?: WasabiRequestOptions,
-  ): Promise<WasabiAccountAsset[]> {
+  getProviderBalance(opts?: WasabiRequestOptions): Promise<WasabiAccountAsset[]> {
     return this.http.post(
       'getProviderBalance',
       '/merchant/core/mcb/account/info',

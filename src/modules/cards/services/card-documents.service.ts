@@ -121,14 +121,11 @@ export class CardDocumentsService {
 
     for (const { field, buffer, mimeType, docType } of validated) {
       try {
-        const res = await this.wasabiApi.uploadDocument(
-          {
-            file: buffer,
-            fileName: `${docType.toLowerCase()}.${mimeType.split('/')[1]}`,
-            mimeType,
-          },
-          { programId: holder.programId },
-        );
+        const res = await this.wasabiApi.uploadDocument({
+          file: buffer,
+          fileName: `${docType.toLowerCase()}.${mimeType.split('/')[1]}`,
+          mimeType,
+        });
         results.push({ field, fileId: res.fileId, success: true });
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Upload failed';

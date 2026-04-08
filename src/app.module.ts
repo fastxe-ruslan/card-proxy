@@ -41,15 +41,13 @@ import { ScheduleModule } from '@nestjs/schedule';
         WASABI_API_BASE_URL: Joi.string()
           .uri()
           .default('https://api.wasabi.local'),
-        WASABI_API_KEY: Joi.string().default('dev-key'),
-        WASABI_API_SECRET: Joi.string().default('dev-secret'),
-        WASABI_WEBHOOK_SECRET: Joi.string().default('dev-webhook-secret'),
-        WASABI_PROGRAM_ID: Joi.string().optional(),
-        WASABI_APP_ID: Joi.string().optional(),
-        WASABI_PRIVATE_KEY: Joi.string().optional(),
+        WASABI_API_KEY: Joi.string().default('dev-api-key'),
+        /** Merchant RSA private key PEM — signs outgoing API calls; Card3dsHandler also uses for decrypt. */
+        WASABI_PRIVATE_KEY: Joi.string().allow('').default(''),
         WASABI_TIMEOUT_MS: Joi.number().default(10000),
         WASABI_MAX_RETRIES: Joi.number().default(3),
-        // WASABI_WEBHOOK_PUBLIC_KEY: Joi.string().optional(),
+        /** Wasabi RSA public key for `X-WSB-SIGNATURE` on inbound webhooks. */
+        WASABI_WEBHOOK_PUBLIC_KEY: Joi.string().optional().allow(''),
         SKIP_WEBHOOK_SIGNATURE_VERIFICATION: Joi.string()
           .valid('true', 'false')
           .default('false'),

@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Repository } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import { WebhookEventEntity } from '../audit/entities/webhook-event.entity';
 import { TransactionEntity } from '../transactions/entities/transaction.entity';
 import { WasabiApiService } from '../wasabi-client/services/wasabi-api.service';
@@ -22,7 +21,6 @@ export class WasabiSyncService {
     @InjectRepository(TransactionEntity)
     private readonly transactionRepo: Repository<TransactionEntity>,
     private readonly wasabiApi: WasabiApiService,
-    private readonly configService: ConfigService,
   ) {}
 
   async ingestWebhook(payload: Record<string, unknown>): Promise<void> {
@@ -43,17 +41,11 @@ export class WasabiSyncService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async reconcile(): Promise<void> {
-    const programId = this.configService.get<string>('WASABI_PROGRAM_ID');
-    if (!programId) {
-      this.logger.warn('WASABI_PROGRAM_ID not set — skipping reconciliation');
-      return;
-    }
-
     try {
-      const txResponse = await this.wasabiApi.getAuthTransactions(
-        { pageNum: 1, pageSize: 200 },
-        { programId },
-      );
+      const txResponse = await this.wasabiApi.getAuthTransactions({
+        pageNum: 1,
+        pageSize: 200,
+      });
 
       for (const tx of txResponse.records) {
         await this.transactionRepo.upsert(
